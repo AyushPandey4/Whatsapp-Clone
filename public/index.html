@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bodydiv">
+    <div class="title">Chat</div>
+    <div class="container" id="container">
+        <!-- <div class="chatfullwidth">
+            <div class="mychat">
+                <div class="mytext">my texts.....</div>
+                <div class="time">12:54</div>
+            </div>
+        </div>
+        <div class="chatfullwidth">
+            <div class="otherchat">
+                <div class="mytext">other texts.....</div>
+                <div class="time">12:55</div>
+            </div>
+        </div>
+         -->
+        
+    </div>
+    <div class="formdiv">
+        <form action="#">
+            <input type="text" placeholder="Type here..." id="text">
+            <button id="btn">send</button>
+        </form>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+    // const username = prompt('enter your name');
+    // alert(`${username} has joined the chat`);
+
+    const container = document.getElementById('container');
+    const text = document.getElementById('text');
+    const btn = document.getElementById('btn')
+    
+    btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const textmsg = text.value;
+        if(textmsg.length != 0){
+            socket.emit('chat message',{ msg: textmsg, sender: 'me' });
+            text.value = '';
+
+        }else{
+            alert('please write something...')
+        }
+
+    })
+
+    socket.on('chat message', function(data) {
+        appendMessage(data.sender, data.msg);
+    });
+
+    function appendMessage(sender, msg) {
+        console.log('Appending message:', sender, msg);
+        const newChat = document.createElement('div');
+        newChat.classList.add('chatfullwidth');
+
+        if (sender !== 'me') {
+            newChat.innerHTML = `
+                <div class="otherchat">
+                    <div class="othertext">${msg}</div>
+                    <div class="time">${getCurrentTime()}</div>
+                </div>
+            `;
+        } else {
+            newChat.innerHTML = `
+                <div class="mychat">
+                    <div class="mytext">${msg}</div>
+                    <div class="time">${getCurrentTime()}</div>
+                </div>
+            `;
+            
+        }
+        container.appendChild(newChat);
+        
+    }
+
+    function getCurrentTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+
+</script>
+
+    
+</body>
+</html>
